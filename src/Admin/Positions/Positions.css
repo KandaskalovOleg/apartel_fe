@@ -1,0 +1,59 @@
+.add-delete {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 40px;
+  margin: 20px 0;
+}
+
+@media (max-width: 900px) {
+  .add-delete {
+    flex-direction: column;
+  }
+}
+
+.add-position, .delete-position {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  gap: 20px;
+  background-color: #FFF;
+  padding: 20px 40px;
+  border: 1px solid rgba(0, 0, 0, 0.6);
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.tab-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.title-question {
+  text-align: left;
+}
+
+.title-type {
+  display: block;
+  text-align: left;
+}
+
+.MuiTabs-scrollButtons {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.form-add {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 80%;
+  justify-content: center;
+  margin: 100px auto;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+}
+
+legend {
+  color: rgba(0, 0, 0, 0.6) !important;
+}

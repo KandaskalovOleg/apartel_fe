@@ -1,0 +1,7 @@
+.navigation {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  margin: 20px auto;
+  gap: 20px;
+}

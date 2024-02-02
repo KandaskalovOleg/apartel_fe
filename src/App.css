@@ -1,0 +1,37 @@
+#root {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.card {
+  padding: 2em;
+}
+
+.header, main {
+  display: flex;
+  margin: 15px;
+}
+
+.logo-wrapper {
+  display: flex;
+}
+
+.logo {
+  height: 40px;
+}
+
+.registration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+  height: 100px;
+  gap: 10px;
+}
+
+h1, h2, h3, h5, h6, p, span {
+  color: rgba(0, 0, 0, 0.6);
+}

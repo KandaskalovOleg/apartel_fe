@@ -1,0 +1,15 @@
+.user-style {
+  color: black;
+  margin: 20px 0 20px;
+  text-align: left;
+}
+
+.user-task-title {
+  margin-bottom: 10px !important;
+}
+
+.send-button {
+  align-items: center;
+  display: flex;
+  margin: 0 auto;
+}
