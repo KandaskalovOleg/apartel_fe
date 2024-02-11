@@ -24,7 +24,7 @@ export const Root = () => (
         </Route>
 
         <Route path="employee" element={<User />}>
-          {/* <Route path="info" element={<Info />} /> */}
+          <Route path="info" element={<Info />} />
           <Route path="tasks" element={<Tasks />} />
         </Route>
       </Route>

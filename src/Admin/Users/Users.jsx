@@ -179,6 +179,10 @@ function Users() {
 
   return (
     <>
+    {loading ? (
+      <CircularProgress />
+        ) : (
+    <>
       <Typography variant="h3" gutterBottom>
         Користувачі
       </Typography>
@@ -233,9 +237,7 @@ function Users() {
         </DialogContent>
       </Dialog>
 
-      {loading ? (
-        <CircularProgress />
-      ) : (
+
         <TableContainer component={Paper} style={{ marginBottom: '40px' }}>
           <Table>
             <TableHead style={{ backgroundColor: '#A46941' }}>
@@ -286,7 +288,7 @@ function Users() {
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.surname}</TableCell>
                   <TableCell>{user.position}</TableCell>
-                  <TableCell>{user.answer ? user.answer.mark : 'відсутні'}</TableCell>
+                  <TableCell>{user.answer ? user.answer.marks[user.answer.marks.length - 1] : 'відсутні'}</TableCell>
                   <TableCell>{user.password}</TableCell>
                   <TableCell style={{ position: 'sticky', right: 0, backgroundColor: '#A46941', textAlign: 'center' }}>
                   <IconButton
@@ -318,6 +320,7 @@ function Users() {
             </TableBody>
           </Table>
         </TableContainer>
+        </>
       )}
     </>
   );

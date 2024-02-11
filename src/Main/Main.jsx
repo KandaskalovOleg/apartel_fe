@@ -41,10 +41,16 @@ function Main() {
           const position = data.position;
 
           if (position === 'Керівник') {
+            sessionStorage.setItem('hotelPassword', password);
+
             navigate('/admin/users');
           } else {
+            const password = data.password;
+
             sessionStorage.setItem('hotelPosition', position);
-            navigate('/employee/tasks');
+            sessionStorage.setItem('hotelPassword', password);
+
+            navigate('/employee/info');
           }
         } else {
           setError('Неправильний пароль');

@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { Grid } from '@mui/material';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Link } from '@mui/material';
 import { styled } from '@mui/system';
 import './User.css';
@@ -20,6 +21,15 @@ const StyledLink = styled(Link)({
 });
 
 function Employee() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const position = sessionStorage.getItem('hotelPosition');
+    const password = sessionStorage.getItem('hotelPassword');
+    if (!password || !position) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   return (
     <Grid
@@ -27,9 +37,9 @@ function Employee() {
       style={{ margin: '0 20px', flexDirection: 'column'}}
     >
       <div className='navigation'>
-        {/* <StyledLink to="info" component={NavLink} >
+        <StyledLink to="info" component={NavLink} >
           Інформація
-        </StyledLink> */}
+        </StyledLink>
         <StyledLink to="tasks" component={NavLink} >
           Тест
         </StyledLink>
