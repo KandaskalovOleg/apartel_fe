@@ -2,6 +2,7 @@ import {
   HashRouter as Router,
   Routes,
   Route,
+  Navigate
 } from 'react-router-dom';
 import App from './App';
 import Main from './Main/Main';
@@ -27,6 +28,8 @@ export const Root = () => (
           <Route path="info" element={<Info />} />
           <Route path="tasks" element={<Tasks />} />
         </Route>
+
+        <Route path="*" element={<Navigate to="/" />} />
       </Route>
     </Routes>
   </Router>

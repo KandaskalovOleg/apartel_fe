@@ -61,7 +61,7 @@ function Admin() {
       ) : (
         <div className='navigation'>
           <StyledLink to="/admin/users" component={NavLink} >
-            Користувачі
+            Користувачі та інформація
           </StyledLink>
           <StyledLink to="/admin/positions" component={NavLink} >
             Посади та питання

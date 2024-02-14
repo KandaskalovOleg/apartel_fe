@@ -1,9 +1,14 @@
+import { Typography } from '@mui/material';
 import './Info.css';
 
 function Info() {
 
   return (
-    <h1>info</h1>
+    <>
+      <Typography variant="h3" gutterBottom>
+        Інформація
+      </Typography> 
+    </>
   )
 }
 
