@@ -113,13 +113,15 @@ function Tasks() {
     }
   }, []);
 
+  console.log(questionsData);
+
   return (
     <>
       <Typography variant="h3" gutterBottom>
         Тест
       </Typography>    
       {!testCompleted && <Container className={`user-style ${testCompleted ? 'hidden' : ''}`}>
-        {!loading ? (
+        {!loading && questionsData.error !== 'Position not found' ? (
           questionsData.map((q, questionIndex) => (
             <Paper key={questionIndex} elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
               <Typography variant="h6" className='user-task-title'>{q.question}</Typography>
@@ -185,12 +187,16 @@ function Tasks() {
         )}
       </Container>
     }
-      {testCompleted && marks !== null ? (
-        <Typography variant="h5" gutterBottom>
-          Кількість правильних відповідей: {marks}
-        </Typography>
-      ) : (
-        <CircularProgress />
+      {testCompleted && (
+        <>
+          {marks !== null ? (
+            <Typography variant="h5" gutterBottom>
+              Кількість правильних відповідей: {marks}
+            </Typography>
+          ) : (
+            <CircularProgress />
+          )}
+        </>
       )}
     </>
   )

@@ -18,7 +18,16 @@ import {
   DialogContent,
   TextField,
   Autocomplete,
+  Box, 
+  Accordion, 
+  AccordionSummary, 
+  ListItemIcon, 
+  List, 
+  ListItem, 
+  ListItemText
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { config } from './../../env/env';
 import { styled } from '@mui/system';
@@ -55,7 +64,8 @@ function Users() {
   const [openForm, setOpenForm] = useState(false);
   const [newUserData, setNewUserData] = useState({ name: '', surname: '', position: '' });
   const [selectedUserId, setSelectedUserId] = useState(null);
-
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,6 +102,15 @@ function Users() {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+  };
+
+  const handleOpenDetailsDialog = (user) => {
+    setSelectedUser(user);
+    setOpenDetailsDialog(true);
+  };
+  
+  const handleCloseDetailsDialog = () => {
+    setOpenDetailsDialog(false);
   };
 
   const handleSortRequest = (property) => {
@@ -288,7 +307,16 @@ function Users() {
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.surname}</TableCell>
                   <TableCell>{user.position}</TableCell>
-                  <TableCell>{user.answer ? user.answer.marks[user.answer.marks.length - 1] : 'відсутні'}</TableCell>
+                  <TableCell 
+                    onClick={() => {
+                      if (user.answer) {
+                        handleOpenDetailsDialog(user);
+                      }
+                    }}
+                    style={{cursor: 'pointer'}}
+                  >
+                    {user.answer ? user.answer.marks[user.answer.marks.length - 1] : 'відсутні'}
+                  </TableCell>
                   <TableCell>{user.password}</TableCell>
                   <TableCell style={{ position: 'sticky', right: 0, backgroundColor: '#A46941', textAlign: 'center' }}>
                   <IconButton
@@ -312,6 +340,61 @@ function Users() {
                       </Button>
                       <Button onClick={() => handleDeleteUser(selectedUserId)} color="error">
                         Видалити
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+                  <Dialog open={openDetailsDialog} onClose={handleCloseDetailsDialog}>
+                    <DialogTitle>Деталі користувача</DialogTitle>
+                    <DialogContent>
+                      {selectedUser && (
+                        <>
+                          <div className='userBlock'>
+                            <p>Ім'я: {selectedUser.name}</p>
+                            <p>Прізвище: {selectedUser.surname}</p>
+                            <p>Посада: {selectedUser.position}</p>
+                            <p>Відповіді: {selectedUser.answer ? selectedUser.answer.marks[selectedUser.answer.marks.length - 1] : 'відсутні'}</p>
+                          </div>
+                          <div>
+                            {positions
+                              .filter(position => position.name === selectedUser.position)
+                              .map((position, index) => (
+                                position.pool.map((question, questionIndex) => (
+                                  <Accordion key={questionIndex} style={{ padding: '20px', marginBottom: '20px' }}>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                      <Typography variant="h6" className='title-question'>
+                                        {question.question}
+                                      </Typography>
+                                    </AccordionSummary>
+                                    <List>
+                                      {Object.entries(question.options).map(([optionText, optionValue], optionIndex) => (
+                                        <ListItem key={optionIndex}>
+                                          <ListItemIcon>
+                                            <FiberManualRecordIcon style={{ color: optionValue ? 'green' : 'red' }} />
+                                          </ListItemIcon>
+                                          <ListItemText primary={optionText} />
+                                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                                            {selectedUser.answer.results.map((result, resultIndex) => (
+                                              <div key={resultIndex}>
+                                                {result[questionIndex] && (
+                                                  <FiberManualRecordIcon style={{ color: result[questionIndex][optionIndex] ? '#A46941' : 'eee', marginRight: '5px' }} />
+                                                )}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </ListItem>
+                                      ))}
+                                    </List>
+                                  </Accordion>
+                                ))
+                              ))}
+                          </div>
+
+                        </>
+                      )}
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleCloseDetailsDialog} style={{ backgroundColor: '#47B972', color: '#fff'}}>
+                        Закрити
                       </Button>
                     </DialogActions>
                   </Dialog>
