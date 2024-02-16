@@ -1,6 +1,7 @@
 import Logo from './../public/logo.jpg';
 import './App.css';
 import { Outlet } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 function App() {
 
@@ -8,9 +9,9 @@ function App() {
     <>
       <header className='header'>
         <div className='logo-wrapper'>
-          <a href="/">
+          <Link to="/">
            <img src={Logo} className="logo" alt="logo" />
-          </a>
+          </Link>
         </div>
       </header>
       <main>

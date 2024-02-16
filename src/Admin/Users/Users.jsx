@@ -21,10 +21,13 @@ import {
   Box, 
   Accordion, 
   AccordionSummary, 
+  AccordionDetails,
   ListItemIcon, 
   List, 
   ListItem, 
-  ListItemText
+  ListItemText,
+  Tab,
+  Tabs 
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
@@ -32,6 +35,21 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { config } from './../../env/env';
 import { styled } from '@mui/system';
 import './Users.css';
+
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const MyTabs = styled(Tabs)({
+  '& .MuiTabs-indicator': {
+    backgroundColor: '#47B972',
+  },
+  '& .MuiTab-root': {
+    color: 'rgba(0, 0, 0, 0.6)',
+    '&.Mui-selected': {
+      color: '#47B972',
+    },
+  },
+});
 
 const StyledTextField = styled(TextField)({
   '& label.Mui-focused': {
@@ -66,6 +84,30 @@ function Users() {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
+  const [currentTab, setCurrentTab] = useState(0);
+
+  const [editorHtmls, setEditorHtmls] = useState(positions.map(() => ''));
+
+  const handleSaveContent = async (index) => {
+    try {
+      const html = editorHtmls[index];
+      const positionId = positions[index].id;
+
+      await fetch(`${config.apiUrl}api/positions/${positionId}/info`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ html }),
+      });
+
+      const updatedPositions = [...positions];
+      updatedPositions[index].info = html;
+      setPositions(updatedPositions);
+    } catch (error) {
+      console.error('Помилка при збереженні вмісту:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,6 +127,9 @@ function Users() {
         const response = await fetch(`${config.apiUrl}api/positions`);
         const data = await response.json();
         setPositions(data);
+
+        const editorHtmlsFromServer = data.map((position) => position.info || ''); 
+        setEditorHtmls(editorHtmlsFromServer);
       } catch (error) {
         console.error('Помилка при отриманні посад:', error);
       } finally {
@@ -194,6 +239,10 @@ function Users() {
       return 1;
     }
     return 0;
+  };
+
+  const handleChange = (event, newValue) => {
+    setCurrentTab(newValue);
   };
 
   return (
@@ -405,11 +454,35 @@ function Users() {
           </TableContainer>
         </>
       )}
-      <div>
+      <>
         <Typography variant="h3" gutterBottom>
           Інформація для питань
         </Typography>
-      </div>
+        <Box sx={{ maxWidth: '100%', backgroundColor: '#FFF', borderRadius: '5px' }}>
+          <MyTabs value={currentTab} onChange={handleChange} variant="scrollable" scrollButtons allowScrollButtonsMobile>
+            {positions.map((position, index) => (
+              <Tab key={index} label={position.name} />
+            ))}
+          </MyTabs>
+        </Box>
+        {positions.map((position, index) => (
+          <div key={index} hidden={currentTab !== index}>
+            
+            <div>
+              <ReactQuill
+                theme="snow"
+                value={editorHtmls[index]}
+                onChange={(html) => {
+                  const newHtmls = [...editorHtmls];
+                  newHtmls[index] = html;
+                  setEditorHtmls(newHtmls);
+                }}
+              />
+              <Button onClick={() => handleSaveContent(index)}>Редагувати</Button>
+            </div>
+          </div>
+        ))}
+      </>
     </>
   );
 }
