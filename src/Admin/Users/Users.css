@@ -13,3 +13,14 @@
   justify-content: center;
   flex-wrap: wrap;
 }
+
+.react-quill blockquote,
+.react-quill ul,
+.react-quill li,
+.react-quill blockquote {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.react-quill {
+  margin-bottom: 60px;
+}

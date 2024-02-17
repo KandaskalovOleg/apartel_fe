@@ -36,7 +36,7 @@ import { config } from './../../env/env';
 import { styled } from '@mui/system';
 import './Users.css';
 
-import ReactQuill from 'react-quill';
+import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 const MyTabs = styled(Tabs)({
@@ -452,37 +452,54 @@ function Users() {
               </TableBody>
             </Table>
           </TableContainer>
+          <>
+            <Typography variant="h3" gutterBottom>
+              Інформація для питань
+            </Typography>
+            <Box sx={{ maxWidth: '100%', backgroundColor: '#FFF', borderRadius: '5px' }}>
+              <MyTabs value={currentTab} onChange={handleChange} variant="scrollable" scrollButtons allowScrollButtonsMobile>
+                {positions.map((position, index) => (
+                  <Tab key={index} label={position.name} />
+                ))}
+              </MyTabs>
+            </Box>
+            {positions.map((position, index) => (
+              <div key={index} hidden={currentTab !== index}>
+                <div className='react-quill'>
+                  <ReactQuill
+                    theme="snow"
+                    value={editorHtmls[index]}
+                    onChange={(html) => {
+                      const newHtmls = [...editorHtmls];
+                      newHtmls[index] = html;
+                      setEditorHtmls(newHtmls);
+                    }}
+                    style={{ backgroundColor: '#ffffff' }}
+                    modules={{
+                      toolbar: {
+                        container: [
+                          [{ header: [1, 2, false] }],
+                          ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                          ['link', 'image'],
+                          ['clean']
+                        ],
+                      },
+                    }}
+                  />
+                  <Button 
+                    onClick={() => handleSaveContent(index)}
+                    variant="contained"
+                    style={{ backgroundColor: '#47B972', margin: '20px auto 20px', maxWidth: '300px'}}
+                  >
+                    Редагувати
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </>
         </>
       )}
-      <>
-        <Typography variant="h3" gutterBottom>
-          Інформація для питань
-        </Typography>
-        <Box sx={{ maxWidth: '100%', backgroundColor: '#FFF', borderRadius: '5px' }}>
-          <MyTabs value={currentTab} onChange={handleChange} variant="scrollable" scrollButtons allowScrollButtonsMobile>
-            {positions.map((position, index) => (
-              <Tab key={index} label={position.name} />
-            ))}
-          </MyTabs>
-        </Box>
-        {positions.map((position, index) => (
-          <div key={index} hidden={currentTab !== index}>
-            
-            <div>
-              <ReactQuill
-                theme="snow"
-                value={editorHtmls[index]}
-                onChange={(html) => {
-                  const newHtmls = [...editorHtmls];
-                  newHtmls[index] = html;
-                  setEditorHtmls(newHtmls);
-                }}
-              />
-              <Button onClick={() => handleSaveContent(index)}>Редагувати</Button>
-            </div>
-          </div>
-        ))}
-      </>
     </>
   );
 }

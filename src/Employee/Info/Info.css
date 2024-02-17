@@ -1,3 +1,14 @@
 .info {
   display: flex;
+  flex-direction: column;
+  text-align: left;
+  margin-bottom: 60px;
+}
+
+.info blockquote,
+.info ul,
+.info li,
+.info blockquote,
+.info em {
+  color: rgba(0, 0, 0, 0.6);
 }
