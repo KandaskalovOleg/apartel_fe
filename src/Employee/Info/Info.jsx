@@ -25,12 +25,12 @@ function Info() {
   }, []);
 
   return (
-    <>
+    <div style={{width: '100%'}}>
       <Typography variant="h3" gutterBottom>
         Інформація
       </Typography> 
       <div className='info' dangerouslySetInnerHTML={{ __html: positionInfo }} />
-    </>
+    </div>
   );
 }
 

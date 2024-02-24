@@ -346,7 +346,7 @@ function Positions() {
   };
 
   return (
-    <>
+    <div style={{width: '100%'}}>
       <Typography variant="h3" gutterBottom>
         Посади та питання
       </Typography>
@@ -448,7 +448,7 @@ function Positions() {
           ))}
         </TabPanel>
       ))}
-    </>
+    </div>
   );
 }
 

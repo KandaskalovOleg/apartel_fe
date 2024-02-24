@@ -126,7 +126,7 @@ function Tasks() {
             <Paper key={questionIndex} elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
               <Typography variant="h6" className='user-task-title'>{q.question}</Typography>
               {q.link && (
-                <div>
+                <div className='video-iframe'>
                   <iframe
                     src={q.link}
                     title={`Video for question ${questionIndex}`}

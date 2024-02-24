@@ -34,7 +34,7 @@ function Employee() {
   return (
     <Grid
       container
-      style={{ margin: '0 20px', flexDirection: 'column'}}
+      style={{ margin: '0', flexDirection: 'column'}}
     >
       <div className='navigation'>
         <StyledLink to="info" component={NavLink} >
