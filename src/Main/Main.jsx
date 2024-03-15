@@ -46,9 +46,12 @@ function Main() {
             navigate('/admin/users');
           } else {
             const password = data.password;
+            const name = `${data.name} ${data.surname}`;
 
             sessionStorage.setItem('hotelPosition', position);
             sessionStorage.setItem('hotelPassword', password);
+            sessionStorage.setItem('hotelUserName', name);
+
 
             navigate('/employee/info');
           }

@@ -35,9 +35,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { config } from './../../env/env';
 import { styled } from '@mui/system';
 import './Users.css';
-
-import ReactQuill, { Quill } from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import IframeViewer from '../../Employee/Info/IframeViewer';
 
 const MyTabs = styled(Tabs)({
   '& .MuiTabs-indicator': {
@@ -85,27 +83,45 @@ function Users() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
+  const [fileLoading, setFileLoading] = useState(false);
 
-  const [editorHtmls, setEditorHtmls] = useState(positions.map(() => ''));
+  const [docFiles, setDocFiles] = useState(Array(positions.length).fill(null));
+  const [selectedFileName, setSelectedFileName] = useState('');
+
+  const [showContent, setShowContent] = useState(false);
+
+  const handleShowContent = () => {
+    setShowContent((prevShowContent) => !prevShowContent);
+  };
+  
+  const handleFileChange = (index, event) => {
+    const files = event.target.files;
+    setSelectedFileName(files[0] ? files.name : '');
+    const newDocFiles = [...docFiles];
+    newDocFiles[index] = files[0];
+    setDocFiles(newDocFiles);
+  };
 
   const handleSaveContent = async (index) => {
     try {
-      const html = editorHtmls[index];
+      setFileLoading(true); 
+      const docFile = docFiles[index];
       const positionId = positions[index].id;
 
-      await fetch(`${config.apiUrl}api/positions/${positionId}/info`, {
+      const formData = new FormData();
+      formData.append('doc', docFile);
+
+      const response = await fetch(`${config.apiUrl}api/positions/${positionId}/info`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ html }),
+        body: formData,
       });
 
-      const updatedPositions = [...positions];
-      updatedPositions[index].info = html;
-      setPositions(updatedPositions);
+      setSelectedFileName('');
+
     } catch (error) {
       console.error('Помилка при збереженні вмісту:', error);
+    } finally {
+      setFileLoading(false);
     }
   };
 
@@ -129,7 +145,6 @@ function Users() {
         setPositions(data);
 
         const editorHtmlsFromServer = data.map((position) => position.info || ''); 
-        setEditorHtmls(editorHtmlsFromServer);
       } catch (error) {
         console.error('Помилка при отриманні посад:', error);
       } finally {
@@ -464,36 +479,32 @@ function Users() {
               </MyTabs>
             </Box>
             {positions.map((position, index) => (
-              <div key={index} hidden={currentTab !== index}>
-                <div className='react-quill'>
-                  <ReactQuill
-                    theme="snow"
-                    value={editorHtmls[index]}
-                    onChange={(html) => {
-                      const newHtmls = [...editorHtmls];
-                      newHtmls[index] = html;
-                      setEditorHtmls(newHtmls);
-                    }}
-                    style={{ backgroundColor: '#ffffff' }}
-                    modules={{
-                      toolbar: {
-                        container: [
-                          [{ header: [1, 2, false] }],
-                          ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                          ['link', 'image'],
-                          ['clean']
-                        ],
-                      },
-                    }}
-                  />
+              <div key={index} hidden={currentTab !== index} style={{ width: '100%' }}>
+                <input 
+                  type="file" 
+                  onChange={(event) => handleFileChange(index, event)} 
+                  style={{ color: 'black' }}
+                  value={selectedFileName}
+                  accept=".doc,.docx"
+                  disabled={fileLoading} 
+                />
+                <Button 
+                  onClick={() => handleSaveContent(index)}
+                  variant="contained"
+                  style={{ backgroundColor: '#47B972', margin: '20px auto 20px', maxWidth: '300px'}}
+                  disabled={fileLoading} 
+                >
+                  {fileLoading ? <CircularProgress size={24} color="inherit" /> : 'Додати'}
+                </Button>
+                <div>
                   <Button 
-                    onClick={() => handleSaveContent(index)}
+                    onClick={handleShowContent}
                     variant="contained"
                     style={{ backgroundColor: '#47B972', margin: '20px auto 20px', maxWidth: '300px'}}
                   >
-                    Редагувати
+                    {showContent ? 'Скрити файл' : 'Показати файл'}
                   </Button>
+                  {showContent && <IframeViewer positionName={position.name} />}
                 </div>
               </div>
             ))}

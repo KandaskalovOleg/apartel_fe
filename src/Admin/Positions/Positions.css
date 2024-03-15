@@ -57,3 +57,18 @@
 legend {
   color: rgba(0, 0, 0, 0.6) !important;
 }
+
+.added-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  display: block;
+  margin-bottom: 20px;
+}
+
+@media screen and (min-width: 1200px) {
+  .added-image {
+    width: 500px;
+    height: 100%;
+  }
+}

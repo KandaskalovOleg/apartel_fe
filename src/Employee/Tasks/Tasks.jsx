@@ -18,10 +18,26 @@ function Tasks() {
     setLoading(true);
     fetch(`${config.apiUrl}api/positions/${position}/questions`)
       .then(response => response.json())
-      .then(data => setQuestionsData(data))
+      .then(data => {
+        // Додаємо оригінальний індекс до кожного питання
+        const questionsWithIndex = data.map((question, index) => ({ ...question, originalIndex: index }));
+        // Рандомно перемішуємо масив питань
+        const shuffledQuestions = shuffleArray(questionsWithIndex);
+        setQuestionsData(shuffledQuestions);
+      })
       .catch(error => console.error('Error:', error))
       .finally(() => setLoading(false));
   }, [navigate]);
+  
+  // Функція для перемішування масиву
+  function shuffleArray(array) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+  }
 
   const handleAnswerChange = (questionIndex, optionIndex, isChecked) => {
     setAnswers(prevAnswers => {
@@ -52,6 +68,14 @@ function Tasks() {
   const handleSubmitAnswers = () => {
     if (areAllQuestionsAnswered()) {
       setLoading(true);
+      const originalAnswers = {};
+  
+      // Створюємо об'єкт з відповідями, використовуючи оригінальні індекси питань
+      questionsData.forEach((question, index) => {
+        const originalIndex = question.originalIndex;
+        originalAnswers[originalIndex] = answers[index] || {};
+      });
+  
       fetch(`${config.apiUrl}api/submitAnswers`, {
         method: 'POST',
         headers: {
@@ -59,15 +83,14 @@ function Tasks() {
         },
         body: JSON.stringify({
           password: password,
-          answers: answers,
+          answers: originalAnswers, // Відправляємо відповіді з оригінальними індексами
         }),
       })
         .then(response => response.json())
         .then(data => {
           setTestCompleted(true);
           sessionStorage.setItem('testCompleted', 'true');
-
-          // Отримання marks після успішного відправлення відповідей
+  
           fetch(`${config.apiUrl}api/marks`, {
             method: 'POST',
             headers: {
@@ -113,8 +136,6 @@ function Tasks() {
     }
   }, []);
 
-  console.log(questionsData);
-
   return (
     <>
       <Typography variant="h3" gutterBottom>
@@ -125,6 +146,9 @@ function Tasks() {
           questionsData.map((q, questionIndex) => (
             <Paper key={questionIndex} elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
               <Typography variant="h6" className='user-task-title'>{q.question}</Typography>
+              {q.image && (
+                <img className='added-image' src={q.image}/>
+              )}
               {q.link && (
                 <div className='video-iframe'>
                   <iframe
@@ -190,9 +214,18 @@ function Tasks() {
       {testCompleted && (
         <>
           {marks !== null ? (
-            <Typography variant="h5" gutterBottom>
-              Кількість правильних відповідей: {marks}
-            </Typography>
+            <>
+              <Typography variant="h5" gutterBottom>
+                Кількість правильних відповідей: {marks}
+              </Typography>
+              {
+                +(+marks.split('/')[0] / +marks.split('/')[1]) >= 0.8 ? (
+                  <p style={{color: '#47B972'}}>Тест пройдено</p>
+                ) : (
+                  <p style={{color: 'red'}}>Тест не пройдено</p>
+                )
+              }
+            </>
           ) : (
             <CircularProgress />
           )}

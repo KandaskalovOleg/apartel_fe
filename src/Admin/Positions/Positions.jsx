@@ -61,6 +61,7 @@ function TabPanel({ children, value, index, positionsData, setPositionsData, ...
   const [newQuestion, setNewQuestion] = useState('');
   const [questionType, setQuestionType] = useState('radio');
   const [videoLink, setVideoLink] = useState('');
+  const [image, setImage] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [correctOptions, setCorrectOptions] = useState([]);
   const [hasDuplicateOptions, setHasDuplicateOptions] = useState(false);
@@ -88,6 +89,7 @@ function TabPanel({ children, value, index, positionsData, setPositionsData, ...
     // Очищення варіантів відповіді та питання при зміні типу
     setOptions(['', '']);
     setCorrectOptions([]);
+    setImage('');
     setNewQuestion('');
     setQuestionType(newType);
     setVideoLink('');
@@ -137,6 +139,7 @@ function TabPanel({ children, value, index, positionsData, setPositionsData, ...
         acc[option] = correctOptions.includes(index);
         return acc;
       }, {}),
+      image: image ? image : null,
     };
   
     try {
@@ -156,6 +159,7 @@ function TabPanel({ children, value, index, positionsData, setPositionsData, ...
         setNewQuestion('');
         setQuestionType('radio');
         setVideoLink('');
+        setImage('');
         setOptions(['', '']);
         setCorrectOptions([]);
       } else {
@@ -186,6 +190,11 @@ function TabPanel({ children, value, index, positionsData, setPositionsData, ...
               value={newQuestion}
               onChange={(e) => setNewQuestion(e.target.value)}
             />
+            <StyledTextField
+                label="Посилання на картинку"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+              />
             <FormControl component="fieldset" style={{textAlign: 'left'}}>
               <FormLabel component="legend">Тип питання</FormLabel>
               <RadioGroup
@@ -356,7 +365,7 @@ function Positions() {
           <StyledTextField
             label="Назва посади"
             value={newPositionName}
-            onChange={(e) => setNewPositionName(e.target.value.trim())}
+            onChange={(e) => setNewPositionName(e.target.value)}
           />
           <Button 
             onClick={handleAddPosition} 
@@ -416,6 +425,9 @@ function Positions() {
                   {question.question}
                 </Typography>
               </AccordionSummary>
+              {question.image && (
+                <img className='added-image' src={question.image}/>
+              )}
               {question.link && (
                 <div style={{ textAlign: 'left'}}>
                   <iframe

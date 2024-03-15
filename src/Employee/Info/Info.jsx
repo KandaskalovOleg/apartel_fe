@@ -1,35 +1,16 @@
-import { useState, useEffect } from 'react';
 import { Typography } from '@mui/material';
-import { config } from './../../env/env';
 import './Info.css';
+import IframeViewer from './IframeViewer';
 
 function Info() {
-  const [positionInfo, setPositionInfo] = useState('');
-
-  useEffect(() => {
-    const fetchPositionInfo = async () => {
-      try {
-        const positionName = sessionStorage.getItem('hotelPosition');
-        const response = await fetch(`${config.apiUrl}api/positions/${encodeURIComponent(positionName)}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch position info');
-        }
-        const data = await response.json();
-        setPositionInfo(data.html);
-      } catch (error) {
-        console.error('Помилка при отриманні інформації про позицію:', error);
-      }
-    };
-
-    fetchPositionInfo();
-  }, []);
+  const userName = sessionStorage.getItem('hotelUserName');
+  const positionName = sessionStorage.getItem('hotelPosition');
 
   return (
-    <div style={{width: '100%'}}>
-      <Typography variant="h3" gutterBottom>
-        Інформація
-      </Typography> 
-      <div className='info' dangerouslySetInnerHTML={{ __html: positionInfo }} />
+    <div style={{ width: '100%', overflow: 'hidden', wordWrap: 'break-word' }}>
+      <Typography variant="h3" gutterBottom>Вітаємо {userName}!</Typography>
+      <Typography variant="h3" gutterBottom>Інформація</Typography>
+      <IframeViewer positionName={positionName} />
     </div>
   );
 }
