@@ -82,6 +82,7 @@ function Users() {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
+  const [openAllTestsDialog, setOpenAllTestsDialog] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
   const [fileLoading, setFileLoading] = useState(false);
 
@@ -89,6 +90,7 @@ function Users() {
   const [selectedFileName, setSelectedFileName] = useState('');
 
   const [showContent, setShowContent] = useState(false);
+  const [selectedPositionIndex, setSelectedPositionIndex] = useState(0);
 
   const handleShowContent = () => {
     setShowContent((prevShowContent) => !prevShowContent);
@@ -117,7 +119,8 @@ function Users() {
       });
 
       setSelectedFileName('');
-
+      
+      setShowContent(false);
     } catch (error) {
       console.error('Помилка при збереженні вмісту:', error);
     } finally {
@@ -171,6 +174,15 @@ function Users() {
   
   const handleCloseDetailsDialog = () => {
     setOpenDetailsDialog(false);
+  };
+
+  const handleOpenAllTestsDialog = (user) => {
+    setSelectedUser(user);
+    setOpenAllTestsDialog(true);
+  };
+  
+  const handleCloseAllTestsDialog = (user) => {
+    setOpenAllTestsDialog(false);
   };
 
   const handleSortRequest = (property) => {
@@ -258,6 +270,8 @@ function Users() {
 
   const handleChange = (event, newValue) => {
     setCurrentTab(newValue);
+    setSelectedPositionIndex(newValue);
+    setShowContent(false);
   };
 
   return (
@@ -295,7 +309,7 @@ function Users() {
               margin="normal" 
             />
             <Autocomplete
-              options={positions}
+              options={positions.filter(pos => !pos.access)}
               getOptionLabel={(option) => option.name || ''}
               value={newUserData.position ? positions.find(pos => pos.name === newUserData.position) || '' : ''}
               loading={loadingPositions}
@@ -361,6 +375,15 @@ function Users() {
                       Відповіді
                     </TableSortLabel>
                   </TableCell>
+                  <TableCell style={{ fontWeight: 'bold', color: '#fff' }}>
+                    <TableSortLabel
+                      active={orderBy === 'position'}
+                      direction={orderBy === 'position' ? order : 'asc'}
+                      onClick={() => handleSortRequest('position')}
+                    >
+                      Всі тести
+                    </TableSortLabel>
+                  </TableCell>
                   <TableCell style={{ fontWeight: 'bold', color: '#fff' }}>Пароль</TableCell>
                   <TableCell style={{ position: 'sticky', right: 0, color: '#fff', textAlign: 'center', fontWeight: 'bold', width: '10px', backgroundColor: '#A46941' }}>Видалити</TableCell>
                 </TableRow>
@@ -380,6 +403,16 @@ function Users() {
                       style={{cursor: 'pointer'}}
                     >
                       {user.answer ? user.answer.marks[user.answer.marks.length - 1] : 'відсутні'}
+                    </TableCell>
+                    <TableCell 
+                      onClick={() => {
+                        if (user.alltests) {
+                          handleOpenAllTestsDialog(user);
+                        }
+                      }}
+                      style={{cursor: 'pointer'}}
+                    >
+                      {user.alltests ? 'присутні' : 'відсутні'}
                     </TableCell>
                     <TableCell>{user.password}</TableCell>
                     <TableCell style={{ position: 'sticky', right: 0, backgroundColor: '#A46941', textAlign: 'center' }}>
@@ -462,6 +495,73 @@ function Users() {
                         </Button>
                       </DialogActions>
                     </Dialog>
+
+                    <Dialog open={openAllTestsDialog} onClose={handleCloseAllTestsDialog}>
+                      <DialogTitle>Результати всіх тестів</DialogTitle>
+                      <DialogContent>
+                        {selectedUser && selectedUser.alltests && (
+                          <>
+                            <div className='userBlock'>
+                              <p>Ім'я: {selectedUser.name}</p>
+                              <p>Прізвище: {selectedUser.surname}</p>
+                              <p>Посада: {selectedUser.position}</p>
+                              <p>Відповіді: {selectedUser.alltests ? 'присутні' : 'відсутні'}</p>
+                            </div>
+                            {Object.entries(selectedUser.alltests).map(([positionName, positionData], index) => (
+                              <Accordion key={index}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                  <Typography variant="h6">{positionName}</Typography>
+                                  <Typography variant="h7">
+                                    оцінка: {positionData.marks[positionData.marks.length - 1]}
+                                  </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                  {/* Отримуємо доступні позиції тестування для поточного користувача */}
+                                  {positions
+                                    .filter(position => position.name === positionName && position.access)
+                                    .map((position, index) => (
+                                      // Мапимо питання з пулу кожної доступної позиції
+                                      position.pool.map((question, questionIndex) => (
+                                        <Accordion key={questionIndex} style={{ padding: '20px', marginBottom: '20px' }}>
+                                          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Typography variant="h6" className='title-question'>
+                                              {question.question}
+                                            </Typography>
+                                          </AccordionSummary>
+                                          <List>
+                                            {/* Мапимо опції кожного питання */}
+                                            {Object.entries(question.options).map(([optionText, optionValue], optionIndex) => (
+                                              <ListItem key={optionIndex}>
+                                                <ListItemIcon>
+                                                  <FiberManualRecordIcon style={{ color: optionValue ? 'green' : 'red' }} />
+                                                </ListItemIcon>
+                                                <ListItemText primary={optionText} />
+                                                {/* Отримуємо відповіді користувача на питання з відповідного пулу */}
+                                                {positionData.results.map((result, resultIndex) => (
+                                                  <div key={resultIndex} style={{ display: 'flex', alignItems: 'center' }}>
+                                                    {result[questionIndex] && (
+                                                      <FiberManualRecordIcon style={{ color: result[questionIndex][optionIndex] ? '#A46941' : 'eee', marginRight: '5px' }} />
+                                                    )}
+                                                  </div>
+                                                ))}
+                                              </ListItem>
+                                            ))}
+                                          </List>
+                                        </Accordion>
+                                      ))
+                                    ))}
+                                </AccordionDetails>
+                              </Accordion>
+                            ))}
+                          </>
+                        )}
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={handleCloseAllTestsDialog} style={{ backgroundColor: '#47B972', color: '#fff'}}>
+                          Закрити
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
                   </StyledTableRow>
                 ))}
               </TableBody>
@@ -474,12 +574,18 @@ function Users() {
             <Box sx={{ maxWidth: '100%', backgroundColor: '#FFF', borderRadius: '5px' }}>
               <MyTabs value={currentTab} onChange={handleChange} variant="scrollable" scrollButtons allowScrollButtonsMobile>
                 {positions.map((position, index) => (
-                  <Tab key={index} label={position.name} />
+                  <Tab 
+                    key={index} 
+                    label={position.name} 
+                    sx={{
+                      backgroundColor: position.access ? 'rgba(224, 224, 224, 1)' : '#fff',
+                    }}
+                  />
                 ))}
               </MyTabs>
             </Box>
             {positions.map((position, index) => (
-              <div key={index} hidden={currentTab !== index} style={{ width: '100%' }}>
+              <div key={index} hidden={selectedPositionIndex !== index} style={{ width: '100%' }}>
                 <input 
                   type="file" 
                   onChange={(event) => handleFileChange(index, event)} 
@@ -504,7 +610,7 @@ function Users() {
                   >
                     {showContent ? 'Скрити файл' : 'Показати файл'}
                   </Button>
-                  {showContent && <IframeViewer positionName={position.name} />}
+                  {showContent && selectedPositionIndex === index && <IframeViewer positionName={position.name} />}
                 </div>
               </div>
             ))}

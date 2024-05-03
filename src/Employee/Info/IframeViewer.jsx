@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Typography } from '@mui/material';
 import { config } from './../../env/env';
 
 function IframeViewer({ positionName }) {
   const [fileUrl, setFileUrl] = useState('');
+  const iframeRef = useRef(null);
 
   useEffect(() => {
     const fetchPositionFile = async () => {
@@ -21,35 +22,37 @@ function IframeViewer({ positionName }) {
     };
   
     fetchPositionFile();
-  
-    const handleLoad = (e) => {
-      const iframeDocument = e.target.contentDocument;
-      const iframeImages = iframeDocument.querySelectorAll('img');
-      iframeImages.forEach((img) => {
-        img.style.width = '100%';
-        img.style.height = 'auto';
-      });
-    };
-  
-    const iframe = document.getElementById('embedded-document');
-    if (iframe) {
-      iframe.addEventListener('load', handleLoad);
-    }
-  
-    return () => {
+  }, [positionName]);
+
+  useEffect(() => {
+    const handleLoad = () => {
+      const iframe = iframeRef.current;
       if (iframe) {
-        iframe.removeEventListener('load', handleLoad);
+        const iframeDocument = iframe.contentDocument;
+        if (iframeDocument) {
+          const iframeImages = iframeDocument.querySelectorAll('img');
+          iframeImages.forEach((img) => {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+          });
+        }
       }
     };
-  }, [positionName]);
-  
-  
 
+    const iframe = iframeRef.current;
+    if (iframe) {
+      iframe.addEventListener('load', handleLoad);
+      return () => {
+        iframe.removeEventListener('load', handleLoad);
+      };
+    }
+  }, [fileUrl]);
+  
   return (
     <>
       {fileUrl ? (
         <iframe
-          id="embedded-document"
+          ref={iframeRef}
           title="embedded-document"
           srcDoc={fileUrl}
           style={{ width: '100%', height: '100vh', border: 'none' }}

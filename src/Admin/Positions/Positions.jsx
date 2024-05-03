@@ -61,10 +61,17 @@ function TabPanel({ children, value, index, positionsData, setPositionsData, ...
   const [newQuestion, setNewQuestion] = useState('');
   const [questionType, setQuestionType] = useState('radio');
   const [videoLink, setVideoLink] = useState('');
-  const [image, setImage] = useState('');
+  const [image, setImage] = useState(null);
   const [options, setOptions] = useState(['', '']);
   const [correctOptions, setCorrectOptions] = useState([]);
   const [hasDuplicateOptions, setHasDuplicateOptions] = useState(false);
+  const [selectedImgName, setSelectedImgName] = useState('');
+
+  const handleImageChange = (event) => {
+    const file = event.target.files;
+    setSelectedImgName(file[0] ? file.name : '');
+    setImage(file[0]);
+  }
 
   const handleAddOption = () => {
     setOptions([...options, '']);
@@ -131,44 +138,48 @@ function TabPanel({ children, value, index, positionsData, setPositionsData, ...
       return;
     }
 
-    const newQuestionData = {
-      question: newQuestion,
-      type: questionType,
-      link: questionType.includes('video') ? videoLink : null,
-      options: uniqueOptions.slice(0, uniqueOptions.length).reduce((acc, option, index) => {
-        acc[option] = correctOptions.includes(index);
-        return acc;
-      }, {}),
-      image: image ? image : null,
-    };
-  
-    try {
-      const response = await fetch(`${config.apiUrl}api/questions/${positionId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newQuestionData),
-      });
-  
-      if (response.ok) {
-        const addedQuestion = await response.json();
-        const updatedPositions = [...positionsData];
-        updatedPositions[value].pool.push(addedQuestion);
-        setPositionsData(updatedPositions);
-        setNewQuestion('');
-        setQuestionType('radio');
-        setVideoLink('');
-        setImage('');
-        setOptions(['', '']);
-        setCorrectOptions([]);
-      } else {
-        console.error('Помилка при додаванні питання:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Помилка при відправці запиту на сервер:', error);
+    const formData = new FormData();
+    formData.append('question', newQuestion);
+    formData.append('type', questionType);
+    formData.append('link', questionType.includes('video') ? videoLink : null);
+    
+    // Створюємо об'єкт для options відповідного формату
+    const optionsObject = {};
+    uniqueOptions.forEach((option, index) => {
+        optionsObject[option] = correctOptions.includes(index);
+    });
+    
+    // Додаємо об'єкт options у FormData
+    formData.append('options', JSON.stringify(optionsObject));
+    if (image) {
+        formData.append('image', image);
     }
-  };
+
+    try {
+        const response = await fetch(`${config.apiUrl}api/questions/${positionId}`, {
+            method: 'POST',
+            body: formData,
+        });
+        setSelectedImgName('');
+        if (response.ok) {
+            const addedQuestion = await response.json();
+            const updatedPositions = [...positionsData];
+            updatedPositions[value].pool.push(addedQuestion);
+            setPositionsData(updatedPositions);
+            setNewQuestion('');
+            setQuestionType('radio');
+            setVideoLink('');
+            setImage('');
+            setOptions(['', '']);
+            setCorrectOptions([]);
+        } else {
+            console.error('Помилка при додаванні питання:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Помилка при відправці запиту на сервер:', error);
+    }
+};
+
 
   return (
     <div
@@ -190,11 +201,7 @@ function TabPanel({ children, value, index, positionsData, setPositionsData, ...
               value={newQuestion}
               onChange={(e) => setNewQuestion(e.target.value)}
             />
-            <StyledTextField
-                label="Посилання на картинку"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-              />
+            <input type="file" accept="image/*" onChange={handleImageChange} value={selectedImgName} style={{ color: 'black' }}/>
             <FormControl component="fieldset" style={{textAlign: 'left'}}>
               <FormLabel component="legend">Тип питання</FormLabel>
               <RadioGroup
@@ -265,6 +272,7 @@ function Positions() {
   const [newPositionName, setNewPositionName] = useState('');
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [updated, setUpdated] = useState('false');
+  const [isPositionPublic, setIsPositionPublic] = useState(false);
 
   const handleAddPosition = async () => {
     try {
@@ -273,13 +281,17 @@ function Positions() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: newPositionName }),
+        body: JSON.stringify({ 
+          name: newPositionName,
+          access: isPositionPublic
+        }),
       });
 
       if (response.ok) {
         const newPosition = await response.json();
         setPositionsData(prevPositions => [...prevPositions, newPosition]);
         setNewPositionName('');
+        setIsPositionPublic(false);
       } else {
         console.error('Помилка при додаванні нової позиції:', response.statusText);
       }
@@ -367,6 +379,14 @@ function Positions() {
             value={newPositionName}
             onChange={(e) => setNewPositionName(e.target.value)}
           />
+          <label>
+            Загальнодоступна посада:
+            <input
+              type="checkbox"
+              checked={isPositionPublic}
+              onChange={(e) => setIsPositionPublic(e.target.checked)}
+            />
+          </label>
           <Button 
             onClick={handleAddPosition} 
             variant="contained" 
@@ -406,7 +426,13 @@ function Positions() {
       <Box sx={{ maxWidth: '100%', backgroundColor: '#FFF', borderRadius: '5px' }}>
         <MyTabs value={value} onChange={handleChange} variant="scrollable" scrollButtons allowScrollButtonsMobile>
           {positionsData.map((position, index) => (
-            <Tab key={index} label={position.name} />
+            <Tab 
+              key={index} 
+              label={position.name}
+              sx={{
+                backgroundColor: position.access ? 'rgba(224, 224, 224, 1)' : '#fff',
+              }}
+            />
           ))}
         </MyTabs>
       </Box>
@@ -426,10 +452,10 @@ function Positions() {
                 </Typography>
               </AccordionSummary>
               {question.image && (
-                <img className='added-image' src={question.image}/>
+                <img className='added-image' src={`${config.apiUrl}${question.image}`}/>
               )}
-              {question.link && (
-                <div style={{ textAlign: 'left'}}>
+              {question.link && question.link != 'null' && (
+                <div style={{ textAlign: 'left'}} className='video-iframe'>
                   <iframe
                     src={question.link}
                     title={`Video for question ${questionIndex}`}

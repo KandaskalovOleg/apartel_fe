@@ -147,9 +147,9 @@ function Tasks() {
             <Paper key={questionIndex} elevation={3} style={{ padding: '20px', marginBottom: '20px' }}>
               <Typography variant="h6" className='user-task-title'>{q.question}</Typography>
               {q.image && (
-                <img className='added-image' src={q.image}/>
+                <img className='added-image' src={`${config.apiUrl}${q.image}`}/>
               )}
-              {q.link && (
+              {q.link && q.link != 'null' && (
                 <div className='video-iframe'>
                   <iframe
                     src={q.link}

@@ -43,6 +43,9 @@ function Employee() {
         <StyledLink to="tasks" component={NavLink} >
           Тест
         </StyledLink>
+        <StyledLink to="additional" component={NavLink} >
+          Додаткові тести
+        </StyledLink>
       </div>
       <Outlet />
     </Grid>

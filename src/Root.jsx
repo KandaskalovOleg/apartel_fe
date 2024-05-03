@@ -12,6 +12,7 @@ import Users from './Admin/Users/Users';
 import Positions from './Admin/Positions/Positions';
 import Info from './Employee/Info/Info';
 import Tasks from './Employee/Tasks/Tasks';
+import AdditionalTests from './Employee/Additional/AdditionalTests';
 
 export const Root = () => (
   <Router>
@@ -27,6 +28,7 @@ export const Root = () => (
         <Route path="employee" element={<User />}>
           <Route path="info" element={<Info />} />
           <Route path="tasks" element={<Tasks />} />
+          <Route path="additional" element={<AdditionalTests />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" />} />
