@@ -42,6 +42,7 @@ function Main() {
 
           if (position === 'Керівник') {
             sessionStorage.setItem('hotelPassword', password);
+            sessionStorage.setItem('hotelOwner', true);
 
             navigate('/admin/users');
           } else {

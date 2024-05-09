@@ -42,28 +42,12 @@ function Admin() {
   const [openChangePasswordDialog, setOpenChangePasswordDialog] = useState(false);
 
   useEffect(() => {
-    async function checkPassword() {
-      try {
-        const response = await fetch(`${config.apiUrl}api/checkPassword`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ password: sessionStorage.getItem('hotelPassword') }),
-        });
-
-        if (response.ok) {
-          setLoading(false);
-        } else {
-          navigate('/');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        navigate('/');
-      }
+    const password = sessionStorage.getItem('hotelPassword');
+    const owner = sessionStorage.getItem('hotelOwner');
+    if (!password || !owner) {
+      navigate('/');
     }
-
-    checkPassword();
+    setLoading(false);
   }, [navigate]);
 
   return (
