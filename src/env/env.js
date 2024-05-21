@@ -1,4 +1,4 @@
 export const config = {
-  apiUrl: 'http://194.44.223.69:3000/'
+  apiUrl: 'https://school.apartel-skh.com/'
 };
 //http://localhost:3000/
